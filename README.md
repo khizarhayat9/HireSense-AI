@@ -1,4 +1,6 @@
 # 🎯 HireSense AI — Intelligent Resume Screening & Job Matching Platform
+ DEMO LINK 
+ https://hiresense-ai-by-mana.streamlit.app/
 
 HireSense AI is an end-to-end Natural Language Processing (NLP) recruitment decision-support platform that parses candidate resumes (`.pdf`, `.docx`), structures job descriptions, evaluates lexical and semantic alignment, and produces explainable candidate rankings and downloadable PDF/Excel reports.
 
