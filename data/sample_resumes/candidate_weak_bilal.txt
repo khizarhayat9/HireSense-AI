@@ -1,0 +1,17 @@
+Bilal Ahmed
+Email: bilal.frontend@example.com | Phone: +44-7700-900077
+
+SUMMARY
+Creative Frontend Web Developer specializing in responsive single-page applications and modern UI/UX design.
+
+EDUCATION
+B.A. in Digital Media Design - Beaconhouse National University, 2022
+
+SKILLS
+Frontend: HTML5, CSS3, JavaScript, TypeScript, React, Next.js, Tailwind CSS
+Design & Tools: Figma, Adobe XD, Git, Webpack
+
+EXPERIENCE
+Frontend Developer | PixelCraft Studio (2022 - Present)
+- Built interactive e-commerce storefronts using React, TypeScript, and Tailwind CSS.
+- Collaborated with UI/UX designers to optimize web accessibility and page load speeds.

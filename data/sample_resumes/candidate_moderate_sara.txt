@@ -1,0 +1,18 @@
+Sara Khan
+Email: sara.khan@example.com | Phone: +1-415-555-0192
+
+PROFILE
+Data Analyst transitioning into Artificial Intelligence and predictive modeling. Experienced in statistical analysis, business intelligence, and Python scripting.
+
+EDUCATION
+M.Sc. in Statistics - University of Punjab, 2023
+
+SKILLS
+Programming: Python, R, SQL
+Analytics & AI: Pandas, NumPy, Statistical Modeling, Artificial Intelligence, Data Visualization, PowerBI, Excel
+Soft Skills: Stakeholder communication, analytical problem-solving, teamwork
+
+EXPERIENCE
+Data Analyst | FinCore Solutions (2023 - Present)
+- Performed exploratory data analysis and customer churn forecasting using Python, Pandas, and SQL.
+- Presented weekly analytical insights to non-technical stakeholders.

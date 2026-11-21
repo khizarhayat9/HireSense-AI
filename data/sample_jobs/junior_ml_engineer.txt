@@ -1,0 +1,24 @@
+Job Title: Junior Machine Learning Engineer
+Location: Hybrid / Remote
+Experience Required: 1-3 years (including strong internships or research projects)
+Education: Bachelor's or Master's degree in Computer Science, Data Science, Artificial Intelligence, or a related quantitative field.
+
+About the Role:
+We are looking for a Junior Machine Learning Engineer to build, evaluate, and deploy NLP and predictive analytics pipelines. You will collaborate with product engineers to turn unstructured text and tabular data into production features.
+
+Required Technical Skills:
+- Strong proficiency in Python
+- Data manipulation and analysis using NumPy and Pandas
+- Machine Learning model development with Scikit-learn
+- Experience with Natural Language Processing (NLP) or text classification
+- Proficiency in SQL for querying relational databases
+- Version control with Git
+
+Preferred / Bonus Skills:
+- Experience with Deep Learning frameworks (PyTorch or TensorFlow)
+- Familiarity with Docker and cloud platforms (AWS or GCP)
+- Building REST APIs with FastAPI or Flask
+
+Soft Skills:
+- Clear technical communication
+- Problem-solving mindset and collaborative teamwork

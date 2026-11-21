@@ -1,0 +1,52 @@
+{
+  "programming_languages": {
+    "Python": ["python", "python3", "py"],
+    "SQL": ["sql", "postgresql", "mysql", "sqlite", "t-sql", "pl/sql"],
+    "JavaScript": ["javascript", "js", "es6"],
+    "TypeScript": ["typescript", "ts"],
+    "Java": ["java"],
+    "C++": ["c++", "cpp"],
+    "R": ["r programming", "rstudio"],
+    "Bash": ["bash", "shell scripting", "linux cli"]
+  },
+  "ml_and_ai": {
+    "Machine Learning": ["machine learning", "ml", "predictive modeling", "statistical modeling", "supervised learning", "unsupervised learning"],
+    "Deep Learning": ["deep learning", "dl", "neural networks", "cnn", "rnn", "transformers"],
+    "Natural Language Processing": ["natural language processing", "nlp", "text mining", "text classification", "ner", "sentiment analysis"],
+    "Computer Vision": ["computer vision", "cv", "image classification", "object detection", "opencv"],
+    "Generative AI": ["generative ai", "genai", "llm", "large language models", "rag", "prompt engineering"],
+    "Scikit-learn": ["scikit-learn", "sklearn", "scikit learn"],
+    "PyTorch": ["pytorch", "torch"],
+    "TensorFlow": ["tensorflow", "tf", "keras"],
+    "Sentence-Transformers": ["sentence-transformers", "sentence transformers", "sbert", "semantic embeddings"],
+    "Hugging Face": ["hugging face", "huggingface", "transformers library"],
+    "spaCy": ["spacy"],
+    "NLTK": ["nltk"]
+  },
+  "data_and_analytics": {
+    "Pandas": ["pandas"],
+    "NumPy": ["numpy"],
+    "Data Analysis": ["data analysis", "exploratory data analysis", "eda", "data analytics", "data wrangling"],
+    "Data Visualization": ["data visualization", "plotly", "matplotlib", "seaborn", "powerbi", "power bi", "tableau"],
+    "Statistics": ["statistics", "statistical analysis", "hypothesis testing", "a/b testing", "probability"]
+  },
+  "tools_and_cloud": {
+    "Git": ["git", "github", "gitlab", "version control"],
+    "Docker": ["docker", "containerization", "dockerfile"],
+    "AWS": ["aws", "amazon web services", "s3", "ec2", "sagemaker"],
+    "GCP": ["gcp", "google cloud", "bigquery", "vertex ai"],
+    "Azure": ["azure", "microsoft azure"],
+    "FastAPI": ["fastapi"],
+    "Flask": ["flask"],
+    "Streamlit": ["streamlit"],
+    "React": ["react", "reactjs", "next.js", "nextjs"],
+    "HTML/CSS": ["html", "html5", "css", "css3", "tailwind css"],
+    "Figma": ["figma", "adobe xd", "ui/ux"]
+  },
+  "soft_skills": {
+    "Communication": ["communication", "technical communication", "presentation", "stakeholder communication"],
+    "Problem Solving": ["problem solving", "problem-solving", "analytical thinking", "critical thinking"],
+    "Teamwork": ["teamwork", "collaboration", "collaborative", "cross-functional"],
+    "Leadership": ["leadership", "mentoring", "project management", "agile", "scrum"]
+  }
+}

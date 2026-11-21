@@ -1,0 +1,24 @@
+Ahmad Raza
+Email: ahmad.raza@example.com | Phone: +92-300-1234567 | GitHub: github.com/ahmadraza-ml
+
+SUMMARY
+Machine Learning graduate with 1.5 years of hands-on experience building NLP classification systems, predictive models, and data pipelines in Python.
+
+EDUCATION
+B.S. in Computer Science - National University of Sciences and Technology (NUST), 2024
+Relevant Coursework: Machine Learning, Natural Language Processing, Linear Algebra, Database Systems.
+
+TECHNICAL SKILLS
+Languages: Python, SQL, C++
+ML & Data Science: Scikit-learn, Pandas, NumPy, NLTK, spaCy, Sentence-Transformers, TensorFlow
+Tools: Git, Jupyter, PostgreSQL, Flask
+
+EXPERIENCE
+Junior Data Scientist | TechPulse Analytics (2024 - Present)
+- Developed customer ticket routing models using TF-IDF, Scikit-learn, and Python, improving triage accuracy by 18%.
+- Wrote complex SQL queries to extract and clean 500k+ records using Pandas and NumPy.
+- Built lightweight inference endpoints using Flask and collaborated closely with backend engineers.
+
+PROJECTS
+Automated Resume Screener | Python, spaCy, Scikit-learn
+- Engineered an end-to-end NLP pipeline to parse resumes and rank applicants using cosine similarity.
