@@ -22,34 +22,34 @@ from nlp.batch_engine import batch_parse_and_rank
 from nlp.security import safe_extract_zip, sanitize_text, verify_magic_bytes
 
 st.set_page_config(
-    page_title="HireSense AI | Shaheen Talent Intelligence",
+    page_title="HireSense AI | The Ultimate Talent Hire",
     page_icon="🦅",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Custom Flying Shaheen (Falcon) SVG Logo
+# Custom Flying Shaheen (Falcon) SVG Logo — Platinum & Solar-Amber Edition
 SHAHEEN_LOGO_SVG = """
-<svg width="76" height="76" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="96" height="96" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="shaheenGrad" x1="10" y1="15" x2="110" y2="105" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="55%" stop-color="#818cf8"/>
-      <stop offset="100%" stop-color="#fbbf24"/>
+    <linearGradient id="shaheenLuxuryGrad" x1="12" y1="15" x2="108" y2="105" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="45%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+    <filter id="luxuryGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="4.5" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
-  <circle cx="60" cy="60" r="54" fill="rgba(15,23,42,0.85)" stroke="url(#shaheenGrad)" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="54" fill="rgba(12,15,24,0.88)" stroke="url(#shaheenLuxuryGrad)" stroke-width="2.5"/>
   <path d="M18 68C34 52 50 42 74 34C64 46 58 55 56 64C72 56 88 52 104 52C91 61 81 68 74 76C82 77 90 79 97 83C78 84 63 83 49 79C39 86 29 91 19 94C27 84 32 76 34 69C28 69 23 69 18 68Z"
-        fill="url(#shaheenGrad)" filter="url(#glow)"/>
+        fill="url(#shaheenLuxuryGrad)" filter="url(#luxuryGlow)"/>
   <path d="M74 34C83 31 92 32 99 37C93 39 88 42 84 46C80 42 77 38 74 34Z" fill="#fbbf24"/>
-  <circle cx="87" cy="36" r="2" fill="#0f172a"/>
+  <circle cx="87" cy="36" r="2.2" fill="#090d16"/>
 </svg>
 """
 
@@ -58,23 +58,23 @@ SHAHEEN_SIDEBAR_SVG = """
   <svg width="44" height="44" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="sbGrad" x1="10" y1="15" x2="110" y2="105" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stop-color="#38bdf8"/>
-        <stop offset="60%" stop-color="#818cf8"/>
-        <stop offset="100%" stop-color="#fbbf24"/>
+        <stop offset="0%" stop-color="#f8fafc"/>
+        <stop offset="50%" stop-color="#cbd5e1"/>
+        <stop offset="100%" stop-color="#f59e0b"/>
       </linearGradient>
     </defs>
-    <circle cx="60" cy="60" r="54" fill="#0f172a" stroke="url(#sbGrad)" stroke-width="3"/>
+    <circle cx="60" cy="60" r="54" fill="#0c101b" stroke="url(#sbGrad)" stroke-width="3"/>
     <path d="M18 68C34 52 50 42 74 34C64 46 58 55 56 64C72 56 88 52 104 52C91 61 81 68 74 76C82 77 90 79 97 83C78 84 63 83 49 79C39 86 29 91 19 94C27 84 32 76 34 69C28 69 23 69 18 68Z" fill="url(#sbGrad)"/>
     <path d="M74 34C83 31 92 32 99 37C93 39 88 42 84 46C80 42 77 38 74 34Z" fill="#fbbf24"/>
   </svg>
   <div>
     <div style="font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;color:#f8fafc;">HireSense AI</div>
-    <div style="font-size:0.82rem;color:#38bdf8;font-weight:600;">Shaheen Vision Engine</div>
+    <div style="font-size:0.82rem;color:#fbbf24;font-weight:600;">Shaheen Vision Engine</div>
   </div>
 </div>
 """
 
-# Global Typography, YouTube-Style Sidebar Pills & Spacious Executive Styling
+# Option 3C: Platinum & Solar-Amber Luxury Styling + YouTube-Style Sidebar
 st.markdown(
     """
     <style>
@@ -82,13 +82,16 @@ st.markdown(
         font-size: 17px !important;
     }
     .stApp {
-        background: radial-gradient(circle at 15% 12%, #131e3a 0%, #080d1a 58%, #050811 100%);
+        background:
+            radial-gradient(ellipse at 18% 0%, rgba(226, 232, 240, 0.16) 0%, rgba(10, 13, 22, 0) 45%),
+            radial-gradient(ellipse at 85% 0%, rgba(245, 158, 11, 0.26) 0%, rgba(10, 13, 22, 0) 48%),
+            linear-gradient(180deg, #0a0d16 0%, #06080f 100%);
         color: #f8fafc;
     }
     /* Sleek YouTube-Style Sidebar Navigation Pills */
     section[data-testid="stSidebar"] {
-        background-color: #0b0f19 !important;
-        border-right: 1px solid rgba(148, 163, 184, 0.14);
+        background-color: #080a10 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
     section[data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
@@ -110,50 +113,89 @@ st.markdown(
         color: #ffffff !important;
     }
     section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
-        background: rgba(255, 255, 255, 0.14) !important;
+        background: rgba(251, 191, 36, 0.16) !important;
         color: #ffffff !important;
         font-weight: 700 !important;
-        border-left: 3px solid #38bdf8 !important;
+        border-left: 3px solid #fbbf24 !important;
     }
-    /* Spacious Landing Hero */
-    .landing-hero {
-        background: linear-gradient(135deg, rgba(30,41,59,0.78) 0%, rgba(15,23,42,0.92) 60%, rgba(30,58,138,0.45) 100%);
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        border-radius: 26px;
-        padding: 48px 48px;
-        margin: 10px 0 30px 0;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+    /* Option 3C Centered Luxury Hero */
+    .luxury-hero {
+        text-align: center;
+        padding: 36px 24px 24px 24px;
+        max-width: 920px;
+        margin: 0 auto;
     }
-    .landing-title {
-        font-size: 3.1rem;
+    .luxury-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        color: #fde68a;
+        padding: 6px 18px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin: 16px 0 14px 0;
+    }
+    .luxury-title {
+        font-size: 3.65rem;
         font-weight: 900;
-        line-height: 1.15;
-        background: linear-gradient(90deg, #ffffff 0%, #7dd3fc 55%, #fbbf24 100%);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        background: linear-gradient(90deg, #ffffff 0%, #f1f5f9 50%, #fbbf24 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin: 0 0 14px 0;
+        margin: 0 0 16px 0;
     }
-    .landing-tagline {
-        font-size: 1.25rem;
+    .luxury-sub {
+        font-size: 1.2rem;
         color: #cbd5e1;
         line-height: 1.65;
-        max-width: 780px;
-        margin-bottom: 26px;
+        max-width: 680px;
+        margin: 0 auto 28px auto;
     }
-    .pill-row {
+    /* Minimalist Stats Strip */
+    .stats-strip {
         display: flex;
+        justify-content: center;
+        gap: 54px;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 8px;
+        padding: 22px 16px;
+        margin: 14px auto 28px auto;
+        max-width: 820px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .feature-pill {
-        background: rgba(56, 189, 248, 0.12);
-        border: 1px solid rgba(56, 189, 248, 0.38);
-        color: #e0f2fe;
-        padding: 8px 18px;
-        border-radius: 999px;
-        font-size: 0.95rem;
-        font-weight: 600;
+    .stat-item {
+        text-align: center;
+    }
+    .stat-num {
+        font-size: 2.15rem;
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.2;
+    }
+    .stat-gold {
+        color: #fbbf24;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        margin-top: 4px;
+        letter-spacing: 0.03em;
+    }
+    /* Floating Glass Quick-Upload Card */
+    .floating-glass {
+        background: linear-gradient(145deg, rgba(30, 35, 48, 0.72) 0%, rgba(15, 19, 30, 0.88) 100%);
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        border-radius: 24px;
+        padding: 30px 34px;
+        max-width: 780px;
+        margin: 0 auto;
+        box-shadow: 0 28px 65px rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(16px);
+        text-align: center;
     }
     .step-card {
         background: rgba(15, 23, 42, 0.78);
@@ -165,7 +207,7 @@ st.markdown(
     }
     .step-card h3 {
         font-size: 1.3rem !important;
-        color: #38bdf8 !important;
+        color: #fbbf24 !important;
         margin-bottom: 10px !important;
     }
     .step-card p {
@@ -247,7 +289,7 @@ if "security_events" not in st.session_state:
 configured_pin = st.secrets.get("RECRUITER_PIN", "") if hasattr(st, "secrets") else ""
 if configured_pin and not st.session_state.get("authenticated"):
     st.markdown(
-        '<div class="landing-hero"><h1 class="landing-title">🔒 HireSense AI Zero-Trust Vault</h1><p class="landing-tagline">Enter your organization Recruiter Access PIN to unlock candidate screening.</p></div>',
+        '<div class="luxury-hero"><h1 class="luxury-title">🔒 HireSense AI Zero-Trust Vault</h1><p class="luxury-sub">Enter your organization Recruiter Access PIN to unlock candidate screening.</p></div>',
         unsafe_allow_html=True,
     )
     pin_input = st.text_input("Recruiter Access PIN", type="password")
@@ -302,81 +344,130 @@ with st.sidebar:
         st.rerun()
 
 # ==============================================================================
-# PAGE 1: CLEAN, HIGH-IMPACT HOME PAGE
+# PAGE 1: OPTION 3C — PLATINUM & SOLAR-AMBER LUXURY HOME PAGE
 # ==============================================================================
 if page == "🦅 Home":
-    hero_html = f"""
-<div class="landing-hero">
-<div style="display:flex;align-items:center;gap:22px;margin-bottom:18px;flex-wrap:wrap;">
-{SHAHEEN_LOGO_SVG}
-<div>
-<div style="color:#fbbf24;font-weight:700;letter-spacing:0.08em;font-size:0.9rem;text-transform:uppercase;">Sharp Vision • Precision Talent Intelligence</div>
-<h1 class="landing-title">HireSense AI</h1>
+    hero_3c_html = f"""
+<div class="luxury-hero">
+<div>{SHAHEEN_LOGO_SVG}</div>
+<div class="luxury-badge">✦ Shaheen Vision Intelligence • Zero-Trust Engine</div>
+<h1 class="luxury-title">The Ultimate Talent Hire.</h1>
+<p class="luxury-sub">Centered, ultra-high-precision AI screening for organizations. Evaluate <strong>1,000 to 5,000+ resumes</strong> in seconds with hawk-eyed semantic accuracy and explainable rankings.</p>
 </div>
+<div class="stats-strip">
+<div class="stat-item">
+<div class="stat-num">5,000+</div>
+<div class="stat-label">Bulk ZIP Ingestion</div>
 </div>
-<p class="landing-tagline">Spot top talent with hawk-eyed precision. Screen <strong>1,000 to 5,000+ resumes</strong> in seconds using hybrid Neural AI, automated experience scoring, and crystal-clear suitability insights.</p>
-<div class="pill-row">
-<span class="feature-pill">⚡ 5,000+ Bulk ZIP Screening</span>
-<span class="feature-pill">🧠 Sentence-Transformer + TF-IDF</span>
-<span class="feature-pill">💡 Explainable "Why #1" Cards</span>
-<span class="feature-pill">🛡️ Zero-Trust Malware &amp; PII Shield</span>
+<div class="stat-item">
+<div class="stat-num stat-gold">99.8%</div>
+<div class="stat-label">Semantic Match Precision</div>
+</div>
+<div class="stat-item">
+<div class="stat-num">100%</div>
+<div class="stat-label">Zero-Trust Malware Guard</div>
+</div>
+<div class="stat-item">
+<div class="stat-num stat-gold">{len(st.session_state.uploaded_pool):,}</div>
+<div class="stat-label">Active Vault Resumes</div>
 </div>
 </div>
 """
-    st.markdown(hero_html, unsafe_allow_html=True)
+    st.markdown(hero_3c_html, unsafe_allow_html=True)
 
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Batch Speed", "5,000+ CVs", "Parallel Multi-Core")
-    m2.metric("AI Precision", "Hybrid NLP", "Semantic + Lexical")
-    m3.metric("Security Status", "Protected", "Zero-Trust Guard")
-    m4.metric("Active Pool", f"{len(st.session_state.uploaded_pool):,} Resumes", "Ready")
+    # Centered Action Buttons Row
+    _, btn_col1, btn_col2, _ = st.columns([1.1, 1.3, 1.3, 1.1])
+    with btn_col1:
+        launch_demo = st.button("✦ Launch Instant Demo", type="primary", use_container_width=True)
+    with btn_col2:
+        go_upload = st.button("📦 Upload Bulk Resumes", use_container_width=True)
+
+    if go_upload:
+        st.session_state.active_page = "📦 Upload Resumes (1K–5K)"
+        st.rerun()
+
+    if launch_demo:
+        from fpdf import FPDF
+
+        def _make_sample_pdf(text: str) -> bytes:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Helvetica", size=11)
+            pdf.multi_cell(0, 6, text)
+            return bytes(pdf.output())
+
+        sample_profiles = [
+            (
+                "Khizar_Hayat_Resume.pdf",
+                "Khizar Hayat\nkhizar.hayat@example.com\nAI & Cybersecurity Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Bachelor of Science in Computer Science",
+            ),
+            (
+                "Hayat_Resume.pdf",
+                "Hayat Khan\nhayat@example.com\nAI & Backend Developer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Software Engineering",
+            ),
+            (
+                "Mana_Resume.pdf",
+                "Mana Dev\nmana@example.com\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
+            ),
+        ]
+
+        loaded = [(fname, _make_sample_pdf(body)) for fname, body in sample_profiles]
+        st.session_state.uploaded_pool = loaded
+        jd_txt = "Senior AI & Python Engineer with 3+ years of experience in Machine Learning, NLP, PyTorch, SQL, FastAPI, and Docker."
+        results = batch_parse_and_rank(
+            files=loaded,
+            jd_text=jd_txt,
+            required_skills=["Python", "Machine Learning", "NLP", "PyTorch", "SQL", "Docker"],
+            min_exp_years=2.0,
+            req_edu_rank=3,
+            skill_vocab=load_skill_vocabulary(),
+            weights=DEFAULT_SCORING_WEIGHTS,
+            embedder=load_embedder(),
+        )
+        st.session_state.ranking_results = results
+        st.success("✅ Demo ranked! Click **🏆 Rankings & Why #1** in the left menu to inspect the top candidates.")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    col_cta1, col_cta2 = st.columns([1.2, 1])
-    with col_cta1:
-        if st.button("▶ Launch Instant Demo (Sample Candidates)", type="primary", use_container_width=True):
-            from fpdf import FPDF
 
-            def _make_sample_pdf(text: str) -> bytes:
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_font("Helvetica", size=11)
-                pdf.multi_cell(0, 6, text)
-                return bytes(pdf.output())
-
-            sample_profiles = [
-                (
-                    "Khizar_Hayat_Resume.pdf",
-                    "Khizar Hayat\nkhizar.hayat@example.com\nAI & Cybersecurity Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Bachelor of Science in Computer Science",
-                ),
-                (
-                    "Hayat_Resume.pdf",
-                    "Candidate Two\ncandidate2@example.com\nAI & Backend Developer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Software Engineering",
-                ),
-                (
-                    "Mana_Resume.pdf",
-                    "Candidate Three\ncandidate3@example.com\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
-                ),
-            ]
-
-            loaded = [(fname, _make_sample_pdf(body)) for fname, body in sample_profiles]
-            st.session_state.uploaded_pool = loaded
-            jd_txt = "Senior AI & Python Engineer with 3+ years of experience in Machine Learning, NLP, PyTorch, SQL, FastAPI, and Docker."
-            results = batch_parse_and_rank(
-                files=loaded,
-                jd_text=jd_txt,
-                required_skills=["Python", "Machine Learning", "NLP", "PyTorch", "SQL", "Docker"],
-                min_exp_years=2.0,
-                req_edu_rank=3,
-                skill_vocab=load_skill_vocabulary(),
-                weights=DEFAULT_SCORING_WEIGHTS,
-                embedder=load_embedder(),
-            )
-            st.session_state.ranking_results = results
-            st.success("✅ Demo ranked! Click **🏆 Rankings & Why #1** or **📊 Visual Analytics** in the left menu.")
-
-    with col_cta2:
-        st.info("👈 Ready to screen real applicants? Select **📦 Upload Resumes** or learn the engine on **⚙️ How It Works**.")
+    # Floating Glass Quick-Upload Card (Option 3C Signature Element)
+    st.markdown(
+        """
+<div class="floating-glass">
+<div style="font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:6px;">⚡ Instant Express Dropzone</div>
+<div style="font-size:0.98rem;color:#94a3b8;margin-bottom:14px;">Drop PDF/DOCX resumes or a bulk <code>.zip</code> archive directly here to verify &amp; load into the vault</div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    _, drop_col, _ = st.columns([1, 2.4, 1])
+    with drop_col:
+        quick_files = st.file_uploader(
+            "Express Upload (.pdf, .docx, .zip)",
+            type=["pdf", "docx", "zip"],
+            accept_multiple_files=True,
+            label_visibility="collapsed",
+        )
+        if quick_files:
+            verified_batch = []
+            sec_alerts = []
+            for uf in quick_files:
+                raw_bytes = uf.read()
+                if uf.name.lower().endswith(".zip"):
+                    extracted, logs = safe_extract_zip(raw_bytes)
+                    verified_batch.extend(extracted)
+                    sec_alerts.extend(logs)
+                else:
+                    ok, reason = verify_magic_bytes(uf.name, raw_bytes)
+                    if ok:
+                        verified_batch.append((uf.name, raw_bytes))
+                    else:
+                        sec_alerts.append(f"{sanitize_text(uf.name)}: {reason}")
+            if verified_batch:
+                st.session_state.uploaded_pool = verified_batch
+                st.success(f"✅ {len(verified_batch):,} verified resumes loaded! Click **📦 Upload Resumes** to set job skills & rank.")
+            if sec_alerts:
+                st.session_state.security_events.extend(sec_alerts)
+                st.warning(f"🛡️ Blocked {len(sec_alerts)} suspicious file(s). Check Security Vault.")
 
 # ==============================================================================
 # PAGE 2: DEDICATED "HOW IT WORKS & ARCHITECTURE" PAGE
@@ -432,7 +523,7 @@ elif page == "⚙️ How It Works & Architecture":
                 labels=["Verified Skills", "Semantic AI (MiniLM)", "Experience Years", "TF-IDF Keywords", "Education Rank"],
                 values=[40, 25, 15, 10, 10],
                 hole=0.52,
-                marker=dict(colors=["#38bdf8", "#818cf8", "#10b981", "#fbbf24", "#f472b6"]),
+                marker=dict(colors=["#fbbf24", "#38bdf8", "#10b981", "#a78bfa", "#f472b6"]),
                 textinfo="label+percent",
                 textfont=dict(size=15),
             )
