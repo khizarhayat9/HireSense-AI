@@ -253,32 +253,47 @@ if page == "🏠 Command Center (Welcome)":
 
     st.markdown("---")
     st.subheader("⚡ Instant Demo: Test Enterprise Ranking Now")
-    if st.button("▶ Load Built-In Sample Dataset & Run Live Ranking", type="primary"):
-        sample_dir = ROOT_DIR / "data" / "sample_resumes"
-        jd_file = ROOT_DIR / "data" / "sample_jobs" / "ml_engineer.txt"
-        loaded = []
-        if sample_dir.exists():
-            for p in sample_dir.glob("*.*"):
-                if p.suffix.lower() in {".pdf", ".docx"}:
-                    loaded.append((p.name, p.read_bytes()))
-        if loaded:
-            st.session_state.uploaded_pool = loaded
-            jd_txt = jd_file.read_text(encoding="utf-8") if jd_file.exists() else "Looking for a Python Machine Learning Engineer with NLP, SQL, Docker, and 2+ years experience."
-            results = batch_parse_and_rank(
-                files=loaded,
-                jd_text=jd_txt,
-                required_skills=["Python", "Machine Learning", "NLP", "SQL", "Docker", "Scikit-learn"],
-                min_exp_years=2.0,
-                req_edu_rank=3,
-                skill_vocab=load_skill_vocabulary(),
-                weights=DEFAULT_SCORING_WEIGHTS,
-                embedder=load_embedder(),
-            )
-            st.session_state.ranking_results = results
-            st.success(f"Ranked {len(results)} candidates! Switch to '⚡ AI Ranking & Why #1 Insights' or '📊 Talent Landscape Visualizers' in the sidebar.")
-        else:
-            st.warning("Sample folder not found—go to '📦 High-Volume Upload (1K–5K)' to upload resumes or a ZIP archive!")
+ if st.button("▶ Load Built-In Sample Dataset & Run Live Ranking", type="primary"):
+        from fpdf import FPDF
 
+        def _make_sample_pdf(text: str) -> bytes:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Helvetica", size=11)
+            pdf.multi_cell(0, 6, text)
+            return bytes(pdf.output())
+
+        sample_profiles = [
+            (
+                "Zainab_Ali_Resume.pdf",
+                "Zainab Ali\nzainab.ali@example.com\nSenior Machine Learning Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Master of Science in Artificial Intelligence",
+            ),
+            (
+                "Usman_Tariq_Resume.pdf",
+                "Usman Tariq\nusman.tariq@example.com\nAI & Backend Engineer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Computer Science",
+            ),
+            (
+                "Ayesha_Malik_Resume.pdf",
+                "Ayesha Malik\nayesha.malik@example.com\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
+            ),
+        ]
+
+        loaded = [(fname, _make_sample_pdf(body)) for fname, body in sample_profiles]
+        st.session_state.uploaded_pool = loaded
+        jd_txt = "Senior AI & Python Engineer with 3+ years of experience in Machine Learning, NLP, PyTorch, SQL, FastAPI, and Docker."
+        results = batch_parse_and_rank(
+            files=loaded,
+            jd_text=jd_txt,
+            required_skills=["Python", "Machine Learning", "NLP", "PyTorch", "SQL", "Docker"],
+            min_exp_years=2.0,
+            req_edu_rank=3,
+            skill_vocab=load_skill_vocabulary(),
+            weights=DEFAULT_SCORING_WEIGHTS,
+            embedder=load_embedder(),
+        )
+        st.session_state.ranking_results = results
+        st.success(f"Ranked {len(results)} candidates! Switch to '⚡ AI Ranking & Why #1 Insights' or '📊 Talent Landscape Visualizers' in the sidebar.")
+               
 # ==============================================================================
 # PAGE 2: HIGH-VOLUME UPLOAD (1,000 - 5,000+ RESUMES)
 # ==============================================================================
