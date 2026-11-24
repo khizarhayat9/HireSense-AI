@@ -429,45 +429,7 @@ if page == "🦅 Home":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Floating Glass Quick-Upload Card (Option 3C Signature Element)
-    st.markdown(
-        """
-<div class="floating-glass">
-<div style="font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:6px;">⚡ Instant Express Dropzone</div>
-<div style="font-size:0.98rem;color:#94a3b8;margin-bottom:14px;">Drop PDF/DOCX resumes or a bulk <code>.zip</code> archive directly here to verify &amp; load into the vault</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-    _, drop_col, _ = st.columns([1, 2.4, 1])
-    with drop_col:
-        quick_files = st.file_uploader(
-            "Express Upload (.pdf, .docx, .zip)",
-            type=["pdf", "docx", "zip"],
-            accept_multiple_files=True,
-            label_visibility="collapsed",
-        )
-        if quick_files:
-            verified_batch = []
-            sec_alerts = []
-            for uf in quick_files:
-                raw_bytes = uf.read()
-                if uf.name.lower().endswith(".zip"):
-                    extracted, logs = safe_extract_zip(raw_bytes)
-                    verified_batch.extend(extracted)
-                    sec_alerts.extend(logs)
-                else:
-                    ok, reason = verify_magic_bytes(uf.name, raw_bytes)
-                    if ok:
-                        verified_batch.append((uf.name, raw_bytes))
-                    else:
-                        sec_alerts.append(f"{sanitize_text(uf.name)}: {reason}")
-            if verified_batch:
-                st.session_state.uploaded_pool = verified_batch
-                st.success(f"✅ {len(verified_batch):,} verified resumes loaded! Click **📦 Upload Resumes** to set job skills & rank.")
-            if sec_alerts:
-                st.session_state.security_events.extend(sec_alerts)
-                st.warning(f"🛡️ Blocked {len(sec_alerts)} suspicious file(s). Check Security Vault.")
+             
 
 # ==============================================================================
 # PAGE 2: DEDICATED "HOW IT WORKS & ARCHITECTURE" PAGE
