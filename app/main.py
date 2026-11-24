@@ -267,32 +267,25 @@ with st.sidebar:
 # PAGE 1: CLEAN, HIGH-IMPACT HOME PAGE (NO CLUTTERED DOC TEXT)
 # ==============================================================================
 if page == "🦅 Home":
-    st.markdown(
-        f"""
-        <div class="landing-hero">
-            <div style="display:flex;align-items:center;gap:22px;margin-bottom:18px;flex-wrap:wrap;">
-                {SHAHEEN_LOGO_SVG}
-                <div>
-                    <div style="color:#fbbf24;font-weight:700;letter-spacing:0.08em;font-size:0.9rem;text-transform:uppercase;">
-                        Sharp Vision • Precision Talent Intelligence
-                    </div>
-                    <h1 class="landing-title">HireSense AI</h1>
-                </div>
-            </div>
-            <p class="landing-tagline">
-                Spot top talent with hawk-eyed precision. Screen <strong>1,000 to 5,000+ resumes</strong> in seconds using hybrid Neural AI, automated experience scoring, and crystal-clear suitability insights.
-            </p>
-            <div class="pill-row">
-                <span class="feature-pill">⚡ 5,000+ Bulk ZIP Screening</span>
-                <span class="feature-pill">🧠 Sentence-Transformer + TF-IDF</span>
-                <span class="feature-pill">💡 Explainable "Why #1" Cards</span>
-                <span class="feature-pill">🛡️ Zero-Trust Malware & PII Shield</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
+    hero_html = f"""
+<div class="landing-hero">
+<div style="display:flex;align-items:center;gap:22px;margin-bottom:18px;flex-wrap:wrap;">
+{SHAHEEN_LOGO_SVG}
+<div>
+<div style="color:#fbbf24;font-weight:700;letter-spacing:0.08em;font-size:0.9rem;text-transform:uppercase;">Sharp Vision • Precision Talent Intelligence</div>
+<h1 class="landing-title">HireSense AI</h1>
+</div>
+</div>
+<p class="landing-tagline">Spot top talent with hawk-eyed precision. Screen <strong>1,000 to 5,000+ resumes</strong> in seconds using hybrid Neural AI, automated experience scoring, and crystal-clear suitability insights.</p>
+<div class="pill-row">
+<span class="feature-pill">⚡ 5,000+ Bulk ZIP Screening</span>
+<span class="feature-pill">🧠 Sentence-Transformer + TF-IDF</span>
+<span class="feature-pill">💡 Explainable "Why #1" Cards</span>
+<span class="feature-pill">🛡️ Zero-Trust Malware &amp; PII Shield</span>
+</div>
+</div>
+"""
+    st.markdown(hero_html, unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Batch Speed", "5,000+ CVs", "Parallel Multi-Core")
     m2.metric("AI Precision", "Hybrid NLP", "Semantic + Lexical")
