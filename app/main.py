@@ -253,7 +253,7 @@ if page == "🏠 Command Center (Welcome)":
 
     st.markdown("---")
     st.subheader("⚡ Instant Demo: Test Enterprise Ranking Now")
- if st.button("▶ Load Built-In Sample Dataset & Run Live Ranking", type="primary"):
+    if st.button("▶ Load Built-In Sample Dataset & Run Live Ranking", type="primary"):
         from fpdf import FPDF
 
         def _make_sample_pdf(text: str) -> bytes:
