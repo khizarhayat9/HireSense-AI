@@ -46,10 +46,8 @@ SHAHEEN_LOGO_SVG = """
     </filter>
   </defs>
   <circle cx="60" cy="60" r="54" fill="rgba(15,23,42,0.85)" stroke="url(#shaheenGrad)" stroke-width="2.5"/>
-  <!-- Soaring Shaheen Wings & Sharp Gaze Profile -->
   <path d="M18 68C34 52 50 42 74 34C64 46 58 55 56 64C72 56 88 52 104 52C91 61 81 68 74 76C82 77 90 79 97 83C78 84 63 83 49 79C39 86 29 91 19 94C27 84 32 76 34 69C28 69 23 69 18 68Z"
         fill="url(#shaheenGrad)" filter="url(#glow)"/>
-  <!-- Sharp Falcon Head & Vision Beam -->
   <path d="M74 34C83 31 92 32 99 37C93 39 88 42 84 46C80 42 77 38 74 34Z" fill="#fbbf24"/>
   <circle cx="87" cy="36" r="2" fill="#0f172a"/>
 </svg>
@@ -76,7 +74,7 @@ SHAHEEN_SIDEBAR_SVG = """
 </div>
 """
 
-# Global Typography & Spacious Executive Styling (Larger, Cleaner, Anti-Doc Layout)
+# Global Typography, YouTube-Style Sidebar Pills & Spacious Executive Styling
 st.markdown(
     """
     <style>
@@ -87,11 +85,35 @@ st.markdown(
         background: radial-gradient(circle at 15% 12%, #131e3a 0%, #080d1a 58%, #050811 100%);
         color: #f8fafc;
     }
-    /* Larger, cleaner sidebar radio items */
-    section[data-testid="stSidebar"] .stRadio label {
+    /* Sleek YouTube-Style Sidebar Navigation Pills */
+    section[data-testid="stSidebar"] {
+        background-color: #0b0f19 !important;
+        border-right: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    section[data-testid="stSidebar"] .stButton > button {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
         font-size: 1.05rem !important;
-        padding: 8px 6px !important;
         font-weight: 500 !important;
+        color: #cbd5e1 !important;
+        gap: 14px !important;
+        transition: all 0.18s ease !important;
+        margin-bottom: 2px !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+        background: rgba(255, 255, 255, 0.14) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        border-left: 3px solid #38bdf8 !important;
     }
     /* Spacious Landing Hero */
     .landing-hero {
@@ -224,7 +246,10 @@ if "security_events" not in st.session_state:
 # Optional Enterprise PIN Gate
 configured_pin = st.secrets.get("RECRUITER_PIN", "") if hasattr(st, "secrets") else ""
 if configured_pin and not st.session_state.get("authenticated"):
-    st.markdown('<div class="landing-hero"><h1 class="landing-title">🔒 HireSense AI Zero-Trust Vault</h1><p class="landing-tagline">Enter your organization Recruiter Access PIN to unlock candidate screening.</p></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="landing-hero"><h1 class="landing-title">🔒 HireSense AI Zero-Trust Vault</h1><p class="landing-tagline">Enter your organization Recruiter Access PIN to unlock candidate screening.</p></div>',
+        unsafe_allow_html=True,
+    )
     pin_input = st.text_input("Recruiter Access PIN", type="password")
     if st.button("Unlock Workspace", type="primary"):
         if pin_input == configured_pin:
@@ -234,22 +259,35 @@ if configured_pin and not st.session_state.get("authenticated"):
             st.error("Invalid Access PIN.")
     st.stop()
 
-# Sidebar Navigation
+# Sidebar Navigation (YouTube-Style Pill Menu)
 with st.sidebar:
     st.markdown(SHAHEEN_SIDEBAR_SVG, unsafe_allow_html=True)
     st.divider()
 
-    page = st.radio(
-        "Navigation",
-        [
-            "🦅 Home",
-            "⚙️ How It Works & Architecture",
-            "📦 Upload Resumes (1K–5K)",
-            "🏆 Candidate Rankings & Why #1",
-            "📊 Visual Analytics & Charts",
-            "🛡️ Cybersecurity Vault",
-        ],
-    )
+    NAV_ITEMS = [
+        ("🦅 Home", "🏠   Home"),
+        ("⚙️ How It Works & Architecture", "⚙️   How It Works"),
+        ("📦 Upload Resumes (1K–5K)", "📦   Upload Resumes"),
+        ("🏆 Candidate Rankings & Why #1", "🏆   Rankings & Why #1"),
+        ("📊 Visual Analytics & Charts", "📊   Visual Analytics"),
+        ("🛡️ Cybersecurity Vault", "🛡️   Security Vault"),
+    ]
+
+    if "active_page" not in st.session_state:
+        st.session_state.active_page = "🦅 Home"
+
+    for page_key, nav_label in NAV_ITEMS:
+        is_active = st.session_state.active_page == page_key
+        if st.button(
+            nav_label,
+            key=f"nav_{page_key}",
+            type="primary" if is_active else "secondary",
+            use_container_width=True,
+        ):
+            st.session_state.active_page = page_key
+            st.rerun()
+
+    page = st.session_state.active_page
 
     st.divider()
     blind_mode = st.toggle("🕶️ Blind Hiring (Redact PII)", value=False)
@@ -264,7 +302,7 @@ with st.sidebar:
         st.rerun()
 
 # ==============================================================================
-# PAGE 1: CLEAN, HIGH-IMPACT HOME PAGE (NO CLUTTERED DOC TEXT)
+# PAGE 1: CLEAN, HIGH-IMPACT HOME PAGE
 # ==============================================================================
 if page == "🦅 Home":
     hero_html = f"""
@@ -286,6 +324,7 @@ if page == "🦅 Home":
 </div>
 """
     st.markdown(hero_html, unsafe_allow_html=True)
+
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Batch Speed", "5,000+ CVs", "Parallel Multi-Core")
     m2.metric("AI Precision", "Hybrid NLP", "Semantic + Lexical")
@@ -295,7 +334,7 @@ if page == "🦅 Home":
     st.markdown("<br>", unsafe_allow_html=True)
     col_cta1, col_cta2 = st.columns([1.2, 1])
     with col_cta1:
-        if st.button("▶ Launch Instant Demo (3 Sample Candidates)", type="primary", use_container_width=True):
+        if st.button("▶ Launch Instant Demo (Sample Candidates)", type="primary", use_container_width=True):
             from fpdf import FPDF
 
             def _make_sample_pdf(text: str) -> bytes:
@@ -307,16 +346,16 @@ if page == "🦅 Home":
 
             sample_profiles = [
                 (
-                    "Zainab_Ali_Resume.pdf",
-                    "Zainab Ali\nzainab.ali@example.com\nSenior Machine Learning Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Master of Science in Artificial Intelligence",
+                    "Khizar_Hayat_Resume.pdf",
+                    "Khizar Hayat\nkhizar.hayat@example.com\nAI & Cybersecurity Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Bachelor of Science in Computer Science",
                 ),
                 (
-                    "Usman_Tariq_Resume.pdf",
-                    "Usman Tariq\nusman.tariq@example.com\nAI & Backend Engineer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Computer Science",
+                    "Hayat_Resume.pdf",
+                    "Candidate Two\ncandidate2@example.com\nAI & Backend Developer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Software Engineering",
                 ),
                 (
-                    "Ayesha_Malik_Resume.pdf",
-                    "Ayesha Malik\nayesha.malik@example.com\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
+                    "Mana_Resume.pdf",
+                    "Candidate Three\ncandidate3@example.com\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
                 ),
             ]
 
@@ -334,10 +373,10 @@ if page == "🦅 Home":
                 embedder=load_embedder(),
             )
             st.session_state.ranking_results = results
-            st.success("✅ Demo ranked! Click **🏆 Candidate Rankings & Why #1** or **📊 Visual Analytics & Charts** in the left menu.")
+            st.success("✅ Demo ranked! Click **🏆 Rankings & Why #1** or **📊 Visual Analytics** in the left menu.")
 
     with col_cta2:
-        st.info("👈 Ready to screen real applicants? Select **📦 Upload Resumes (1K–5K)** or learn the engine on **⚙️ How It Works & Architecture**.")
+        st.info("👈 Ready to screen real applicants? Select **📦 Upload Resumes** or learn the engine on **⚙️ How It Works**.")
 
 # ==============================================================================
 # PAGE 2: DEDICATED "HOW IT WORKS & ARCHITECTURE" PAGE
@@ -353,17 +392,17 @@ elif page == "⚙️ How It Works & Architecture":
     with c1:
         st.markdown(
             """<div class="step-card">
-            <h3>1️⃣ High-Speed Bulk Ingestion (1K–5K Resumes)</h3>
-            <p>Organizations upload a single <code>.zip</code> archive or multiple <code>.pdf</code> / <code>.docx</code> files. Multi-core parallel workers extract text, contact info, degree rank, and total years of experience simultaneously.</p>
-            </div>""",
+<h3>1️⃣ High-Speed Bulk Ingestion (1K–5K Resumes)</h3>
+<p>Organizations upload a single <code>.zip</code> archive or multiple <code>.pdf</code> / <code>.docx</code> files. Multi-core parallel workers extract text, contact info, degree rank, and total years of experience simultaneously.</p>
+</div>""",
             unsafe_allow_html=True,
         )
     with c2:
         st.markdown(
             """<div class="step-card">
-            <h3>2️⃣ Zero-Trust Cybersecurity Inspection</h3>
-            <p>Before parsing a single word, our security shield verifies binary magic bytes (<code>%PDF-</code> / <code>PK</code>), blocks disguised executables, scans for embedded PDF JavaScript or VBA macros, and prevents ZIP-bomb or path-traversal attacks.</p>
-            </div>""",
+<h3>2️⃣ Zero-Trust Cybersecurity Inspection</h3>
+<p>Before parsing a single word, our security shield verifies binary magic bytes (<code>%PDF-</code> / <code>PK</code>), blocks disguised executables, scans for embedded PDF JavaScript or VBA macros, and prevents ZIP-bomb or path-traversal attacks.</p>
+</div>""",
             unsafe_allow_html=True,
         )
 
@@ -372,17 +411,17 @@ elif page == "⚙️ How It Works & Architecture":
     with c3:
         st.markdown(
             """<div class="step-card">
-            <h3>3️⃣ Hybrid Neural + Lexical Scoring Matrix</h3>
-            <p>Every candidate is scored across 5 weighted dimensions: <strong>Verified Skills (40%)</strong>, <strong>Sentence-Transformer Semantic Alignment (25%)</strong>, <strong>Experience Years (15%)</strong>, <strong>TF-IDF Keyword Precision (10%)</strong>, and <strong>Education Level (10%)</strong>.</p>
-            </div>""",
+<h3>3️⃣ Hybrid Neural + Lexical Scoring Matrix</h3>
+<p>Every candidate is scored across 5 weighted dimensions: <strong>Verified Skills (40%)</strong>, <strong>Sentence-Transformer Semantic Alignment (25%)</strong>, <strong>Experience Years (15%)</strong>, <strong>TF-IDF Keyword Precision (10%)</strong>, and <strong>Education Level (10%)</strong>.</p>
+</div>""",
             unsafe_allow_html=True,
         )
     with c4:
         st.markdown(
             """<div class="step-card">
-            <h3>4️⃣ Explainable AI (XAI) "Why #1" Reasoning</h3>
-            <p>Instead of an opaque black-box number, recruiters receive plain-English justification cards highlighting matched skills, missing gaps, experience surplus, and interactive 3D/Bubble talent visualizers.</p>
-            </div>""",
+<h3>4️⃣ Explainable AI (XAI) "Why #1" Reasoning</h3>
+<p>Instead of an opaque black-box number, recruiters receive plain-English justification cards highlighting matched skills, missing gaps, experience surplus, and interactive 3D/Bubble talent visualizers.</p>
+</div>""",
             unsafe_allow_html=True,
         )
 
@@ -482,7 +521,7 @@ elif page == "📦 Upload Resumes (1K–5K)":
                 progress_callback=update_prog,
             )
             st.session_state.ranking_results = ranked
-            st.success(f"🎉 Ranked all **{len(ranked):,}** candidates! Open **🏆 Candidate Rankings & Why #1**.")
+            st.success(f"🎉 Ranked all **{len(ranked):,}** candidates! Open **🏆 Rankings & Why #1**.")
 
 # ==============================================================================
 # PAGE 4: CANDIDATE RANKINGS & "WHY #1" INSIGHTS
@@ -491,7 +530,7 @@ elif page == "🏆 Candidate Rankings & Why #1":
     st.markdown("## 🏆 Ranked Candidates & Explainable AI Insights")
     results = st.session_state.ranking_results
     if not results:
-        st.info("No ranked candidates yet. Run the Instant Demo on **🦅 Home** or upload resumes on **📦 Upload Resumes (1K–5K)**.")
+        st.info("No ranked candidates yet. Run the Instant Demo on **🏠 Home** or upload resumes on **📦 Upload Resumes**.")
         st.stop()
 
     top_n = st.slider("Shortlist Display Count (Top N Candidates)", min_value=1, max_value=max(3, min(500, len(results))), value=min(10, len(results)))
@@ -505,22 +544,16 @@ elif page == "🏆 Candidate Rankings & Why #1":
 
         st.markdown(
             f"""
-            <div class="winner-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-                    <h3 style="margin:0;color:#34d399;font-size:1.45rem;">#{cand['rank']} — {display_name}</h3>
-                    <span style="background:#10b981;color:#022c22;font-weight:800;padding:7px 16px;border-radius:999px;font-size:1rem;">
-                        Match Score: {cand['final_score']}%
-                    </span>
-                </div>
-                <p style="color:#94a3b8;margin:6px 0 12px 0;font-size:1rem;">
-                    📧 {display_email} &nbsp;|&nbsp; 💼 <strong>{cand['experience_years']} yrs experience</strong> &nbsp;|&nbsp; 🎓 {cand['education_label']}
-                </p>
-                <p style="color:#f1f5f9;font-size:1.08rem;margin-bottom:12px;">
-                    <strong>💡 Why Most Suitable:</strong> {sanitize_text(cand['why_suitable'])}
-                </p>
-                <div>{matched_html} {missing_html}</div>
-            </div>
-            """,
+<div class="winner-card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+<h3 style="margin:0;color:#34d399;font-size:1.45rem;">#{cand['rank']} — {display_name}</h3>
+<span style="background:#10b981;color:#022c22;font-weight:800;padding:7px 16px;border-radius:999px;font-size:1rem;">Match Score: {cand['final_score']}%</span>
+</div>
+<p style="color:#94a3b8;margin:6px 0 12px 0;font-size:1rem;">📧 {display_email} &nbsp;|&nbsp; 💼 <strong>{cand['experience_years']} yrs experience</strong> &nbsp;|&nbsp; 🎓 {cand['education_label']}</p>
+<p style="color:#f1f5f9;font-size:1.08rem;margin-bottom:12px;"><strong>💡 Why Most Suitable:</strong> {sanitize_text(cand['why_suitable'])}</p>
+<div>{matched_html} {missing_html}</div>
+</div>
+""",
             unsafe_allow_html=True,
         )
 
@@ -573,21 +606,21 @@ elif page == "🛡️ Cybersecurity Vault":
     with s1:
         st.markdown(
             """<div class="step-card">
-            <h3>🔐 File & Payload Defense</h3>
-            <p>• <strong>Magic-Byte Verification:</strong> Validates true binary headers (<code>%PDF-</code>, <code>PK\\x03\\x04</code>) to block spoofed executables.<br>
-            • <strong>Script & Macro Blocking:</strong> Rejects PDFs with <code>/JavaScript</code> or <code>/Launch</code> triggers and DOCX files containing VBA macros.<br>
-            • <strong>ZIP-Bomb Guard:</strong> Enforces strict compression ratios, 500 MB ceiling, and blocks <code>../</code> path traversal.</p>
-            </div>""",
+<h3>🔐 File & Payload Defense</h3>
+<p>• <strong>Magic-Byte Verification:</strong> Validates true binary headers (<code>%PDF-</code>, <code>PK\\x03\\x04</code>) to block spoofed executables.<br>
+• <strong>Script & Macro Blocking:</strong> Rejects PDFs with <code>/JavaScript</code> or <code>/Launch</code> triggers and DOCX files containing VBA macros.<br>
+• <strong>ZIP-Bomb Guard:</strong> Enforces strict compression ratios, 500 MB ceiling, and blocks <code>../</code> path traversal.</p>
+</div>""",
             unsafe_allow_html=True,
         )
     with s2:
         st.markdown(
             """<div class="step-card">
-            <h3>🕶️ Privacy & XSS Protection</h3>
-            <p>• <strong>HTML/XSS Output Escaping:</strong> Every extracted resume string is sanitized via <code>html.escape()</code> before rendering.<br>
-            • <strong>Blind Hiring Redaction:</strong> Masks names, emails, phone numbers, and URLs across all cards and tables.<br>
-            • <strong>Ephemeral Memory Vault:</strong> Data lives only in active session RAM and wipes cleanly on click.</p>
-            </div>""",
+<h3>🕶️ Privacy & XSS Protection</h3>
+<p>• <strong>HTML/XSS Output Escaping:</strong> Every extracted resume string is sanitized via <code>html.escape()</code> before rendering.<br>
+• <strong>Blind Hiring Redaction:</strong> Masks names, emails, phone numbers, and URLs across all cards and tables.<br>
+• <strong>Ephemeral Memory Vault:</strong> Data lives only in active session RAM and wipes cleanly on click.</p>
+</div>""",
             unsafe_allow_html=True,
         )
 
