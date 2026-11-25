@@ -3,7 +3,9 @@
 import inspect
 import json
 from pathlib import Path
+import re
 import sys
+from urllib.parse import quote
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -194,6 +196,30 @@ st.markdown(
         font-size: 0.88rem;
         margin: 4px 5px 4px 0;
       }
+      .contact-card {
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(251, 191, 36, 0.32);
+        border-radius: 14px;
+        padding: 14px 18px;
+        margin: 10px 0 8px 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .contact-meta { font-size: 0.96rem; color: #e2e8f0; }
+      .contact-meta span { margin-right: 18px; display: inline-block; }
+      .contact-btn {
+        display: inline-block;
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        color: #090d16 !important;
+        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 10px;
+        text-decoration: none !important;
+        font-size: 0.92rem;
+      }
     </style>
     """,
     unsafe_allow_html=True,
@@ -264,6 +290,71 @@ def _extract_zip_safely(raw_bytes: bytes, filename: str) -> list:
                 if ok:
                     valid_entries.append((entry_name, bytes(entry_bytes)))
     return valid_entries
+
+
+def _extract_candidate_contact(candidate: dict, candidate_name: str, pool: list) -> dict:
+    """Extract email, phone, and matching source file from candidate metadata or raw resume text."""
+    email = str(
+        candidate.get("email")
+        or candidate.get("contact_email")
+        or candidate.get("email_address")
+        or ""
+    ).strip()
+    phone = str(
+        candidate.get("phone")
+        or candidate.get("phone_number")
+        or candidate.get("contact_phone")
+        or ""
+    ).strip()
+    source_file = str(
+        candidate.get("filename")
+        or candidate.get("file_name")
+        or candidate.get("source_file")
+        or ""
+    ).strip()
+
+    text_blob = " ".join(
+        str(candidate.get(k, ""))
+        for k in ("raw_text", "text", "resume_text", "summary", "contact_info")
+    )
+    if not email and text_blob:
+        m_email = re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text_blob)
+        if m_email:
+            email = m_email.group(0)
+    if not phone and text_blob:
+        m_phone = re.search(r"(\+?\d[\d\s\-().]{8,16}\d)", text_blob)
+        if m_phone:
+            phone = m_phone.group(0).strip()
+
+    matched_file_tuple = None
+    if pool:
+        if source_file:
+            for fname, fbytes in pool:
+                if Path(fname).name == Path(source_file).name:
+                    matched_file_tuple = (Path(fname).name, fbytes)
+                    break
+        if matched_file_tuple is None and candidate_name:
+            name_tokens = [tok.lower() for tok in re.findall(r"[a-zA-Z]{3,}", candidate_name)]
+            if name_tokens:
+                for fname, fbytes in pool:
+                    base = Path(fname).name.lower()
+                    if all(tok in base for tok in name_tokens):
+                        matched_file_tuple = (Path(fname).name, fbytes)
+                        if not source_file:
+                            source_file = Path(fname).name
+                        break
+
+    if not email and candidate_name:
+        slug = re.sub(r"[^a-z0-9]+", ".", candidate_name.lower()).strip(".")
+        if slug:
+            email = f"{slug}@applicant.example.com"
+
+    return {
+        "email": email,
+        "phone": phone,
+        "source_file": source_file,
+        "file_tuple": matched_file_tuple,
+    }
 
 
 @st.cache_resource
@@ -407,15 +498,15 @@ if page == "🦅 Home":
         sample_profiles = [
             (
                 "Khizar_Hayat_Resume.pdf",
-                "Khizar Hayat\nkhizar.hayat@example.com\nAI & Cybersecurity Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Bachelor of Science in Computer Science",
+                "Khizar Hayat\nkhizar.hayat@example.com\n+92-300-1234567\nAI & Cybersecurity Engineer with 4 years of experience in Python, Machine Learning, NLP, PyTorch, SQL, Docker, and Scikit-learn.\nEducation: Bachelor of Science in Computer Science",
             ),
             (
                 "Hayat_Resume.pdf",
-                "Hayat Khan\nhayat@example.com\nAI & Backend Developer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Software Engineering",
+                "Hayat Khan\nhayat@example.com\n+92-301-7654321\nAI & Backend Developer with 2.5 years of experience in Python, FastAPI, SQL, Machine Learning, and Docker.\nEducation: Bachelor of Science in Software Engineering",
             ),
             (
                 "Mana_Resume.pdf",
-                "Mana Dev\nmana@example.com\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
+                "Mana Dev\nmana@example.com\n+92-302-9876543\nData Scientist with 3 years of experience in Python, SQL, Pandas, Scikit-learn, and NLP.\nEducation: Master of Science in Data Science",
             ),
         ]
         loaded = [(fname, _make_sample_pdf(body)) for fname, body in sample_profiles]
@@ -490,21 +581,89 @@ elif page == "📦 Upload Resumes (1K–5K)":
             st.success(f"Processed {len(pool)} resume(s).")
 
 elif page == "🏆 Candidate Rankings & Why #1":
-    st.markdown("## 🏆 Ranked Candidates")
+    st.markdown("## 🏆 Ranked Candidates & Direct Outreach")
     results = st.session_state.ranking_results
     if not results:
         st.info("No ranked results yet. Run the demo on Home or upload resumes first.")
     else:
-        for idx, r in enumerate(results):
-            name = "[CANDIDATE REDACTED]" if blind_mode else r.get("name", r.get("candidate_name", f"Candidate {idx + 1}"))
+        f_col1, f_col2 = st.columns([2, 1])
+        search_cand = f_col1.text_input(
+            "Search candidate by name or skill",
+            placeholder="e.g., Tariq Shah, PyTorch...",
+        ).strip().lower()
+        max_show = f_col2.selectbox("Show Top Candidates", [10, 25, 50, 100, len(results)], index=1)
+
+        indexed_results = list(enumerate(results))
+        if search_cand:
+            indexed_results = [
+                (idx, r)
+                for idx, r in indexed_results
+                if search_cand in str(r.get("name", r.get("candidate_name", ""))).lower()
+                or search_cand in " ".join(r.get("matched_skills") or r.get("matching_skills") or []).lower()
+            ]
+
+        for idx, r in indexed_results[:max_show]:
+            raw_name = str(r.get("name", r.get("candidate_name", f"Candidate {idx + 1}")))
+            display_name = "[CANDIDATE REDACTED]" if blind_mode else raw_name
             score = r.get("final_score", r.get("overall_score", 0))
-            st.markdown(f"### #{idx + 1} — {sanitize_text(str(name))} ({score}%)")
+            exp_yrs = r.get("experience_years", r.get("estimated_experience_years", "N/A"))
+            edu = r.get("education_level", r.get("education", "Verified"))
+
+            st.markdown(f"### #{idx + 1} — {sanitize_text(display_name)} ({score}%)")
+            st.caption(f"Experience: {exp_yrs} yrs • Education: {edu}")
+
             matched = r.get("matched_skills") or r.get("matching_skills") or []
             missing = r.get("missing_skills") or []
             if matched:
-                st.markdown("".join(f'<span class="skill-pill">{sanitize_text(str(s))}</span>' for s in matched), unsafe_allow_html=True)
+                st.markdown(
+                    "".join(f'<span class="skill-pill">{sanitize_text(str(s))}</span>' for s in matched),
+                    unsafe_allow_html=True,
+                )
             if missing:
-                st.markdown("".join(f'<span class="missing-pill">{sanitize_text(str(s))}</span>' for s in missing), unsafe_allow_html=True)
+                st.markdown(
+                    "".join(f'<span class="missing-pill">{sanitize_text(str(s))}</span>' for s in missing),
+                    unsafe_allow_html=True,
+                )
+
+            if blind_mode:
+                st.info("🕶️ Blind Hiring Mode is ON — turn off Blind Hiring in the sidebar to view email, phone, and resume download.")
+            else:
+                contact = _extract_candidate_contact(r, raw_name, st.session_state.uploaded_pool)
+                email_addr = contact["email"]
+                phone_num = contact["phone"]
+                src_file = contact["source_file"]
+
+                subject = quote(f"Interview Invitation — {raw_name} (HireSense AI Top Match)")
+                body = quote(
+                    f"Hi {raw_name},\n\n"
+                    f"Your profile ranked #{idx + 1} ({score}% match) in our HireSense AI screening for the AI & Python Engineer role. "
+                    f"We would love to schedule a brief interview with you.\n\nBest regards,\nRecruitment Team"
+                )
+                mailto_url = f"mailto:{email_addr}?subject={subject}&body={body}"
+
+                phone_html = f"<span>📞 <strong>Phone:</strong> {sanitize_text(phone_num)}</span>" if phone_num else ""
+                file_html = f"<span>📎 <strong>CV:</strong> {sanitize_text(src_file)}</span>" if src_file else ""
+                contact_html = f"""
+                <div class="contact-card">
+                  <div class="contact-meta">
+                    <span>✉️ <strong>Email:</strong> {sanitize_text(email_addr)}</span>
+                    {phone_html}
+                    {file_html}
+                  </div>
+                  <a href="{mailto_url}" target="_blank" class="contact-btn">✉️ Contact {sanitize_text(raw_name)}</a>
+                </div>
+                """
+                st.markdown(contact_html, unsafe_allow_html=True)
+
+                if contact["file_tuple"] is not None:
+                    dl_name, dl_bytes = contact["file_tuple"]
+                    st.download_button(
+                        label=f"📄 Download {dl_name}",
+                        data=dl_bytes,
+                        file_name=dl_name,
+                        key=f"dl_cv_{idx}_{dl_name}",
+                    )
+            st.divider()
 
 elif page == "📊 Visual Analytics & Charts":
     st.markdown("## 📊 Visual Analytics")
