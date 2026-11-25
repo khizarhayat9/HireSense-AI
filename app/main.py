@@ -220,10 +220,27 @@ st.markdown(
         text-decoration: none !important;
         font-size: 0.92rem;
       }
+      .criteria-box {
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 14px;
+        padding: 14px 18px;
+        margin: 8px 0 14px 0;
+      }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
+def _safe_float(val, default: float = 0.0) -> float:
+    """Safely extract a numeric float from candidate fields like '3.5 yrs' or 4."""
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return float(val)
+    m = re.search(r"(\d+(?:\.\d+)?)", str(val))
+    return float(m.group(1)) if m else default
 
 
 def _check_magic_bytes(filename: str, raw_bytes: bytes) -> tuple[bool, str]:
@@ -407,6 +424,7 @@ st.session_state.setdefault("uploaded_pool", [])
 st.session_state.setdefault("ranking_results", [])
 st.session_state.setdefault("security_events", [])
 st.session_state.setdefault("active_page", "🦅 Home")
+st.session_state.setdefault("screening_criteria", {})
 
 configured_pin = st.secrets.get("RECRUITER_PIN", "") if hasattr(st, "secrets") else ""
 if configured_pin and not st.session_state.get("authenticated"):
@@ -455,6 +473,7 @@ with st.sidebar:
     if st.button("🔥 Wipe Session Vault", use_container_width=True):
         st.session_state.uploaded_pool = []
         st.session_state.ranking_results = []
+        st.session_state.screening_criteria = {}
         st.session_state.security_events = ["Memory vault wiped by user."]
         st.rerun()
 
@@ -548,11 +567,54 @@ elif page == "📦 Upload Resumes (1K–5K)":
         type=["zip", "pdf", "docx"],
         accept_multiple_files=True,
     )
+
     jd_text = st.text_area(
-        "Job Description & Required Skills",
+        "Job Description & Role Overview",
         value="Looking for an AI & Python Engineer with Machine Learning, NLP, PyTorch, SQL, and Docker experience.",
-        height=140,
+        height=115,
     )
+
+    skills_raw = st.text_input(
+        "Required Technical Skills (comma-separated)",
+        value="Python, Machine Learning, NLP, PyTorch, SQL, Docker",
+        placeholder="e.g., Python, Machine Learning, NLP, PyTorch, SQL, Docker",
+    )
+
+    st.markdown("### 🎯 Experience & Education Requirements")
+    exp_col, edu_col = st.columns(2)
+    with exp_col:
+        min_exp_years = st.number_input(
+            "Minimum Experience Required (Years)",
+            min_value=0.0,
+            max_value=30.0,
+            value=2.0,
+            step=0.5,
+        )
+        exp_details = st.text_input(
+            "Experience Details & Domain Focus",
+            placeholder="e.g., Production ML models, REST APIs, cloud deployment",
+        )
+
+    with edu_col:
+        edu_levels = {
+            "Any / No Minimum": 0,
+            "High School / Diploma": 1,
+            "Associate Degree": 2,
+            "Bachelor's Degree (BS / BSc)": 3,
+            "Master's Degree (MS / MSc)": 4,
+            "PhD / Doctorate": 5,
+        }
+        selected_edu_label = st.selectbox(
+            "Minimum Education Level",
+            options=list(edu_levels.keys()),
+            index=3,
+        )
+        req_edu_rank = edu_levels[selected_edu_label]
+        edu_details = st.text_input(
+            "Education Details & Field of Study",
+            placeholder="e.g., Computer Science, Artificial Intelligence, Data Science",
+        )
+
     if uploaded and st.button("Run Screening & Ranking", type="primary"):
         pool = []
         for f in uploaded:
@@ -567,18 +629,45 @@ elif page == "📦 Upload Resumes (1K–5K)":
                 else:
                     st.warning(f"{f.name}: {reason}")
         st.session_state.uploaded_pool = pool
+
+        parsed_skills = [s.strip() for s in skills_raw.split(",") if s.strip()]
+        if not parsed_skills:
+            parsed_skills = ["Python", "Machine Learning", "NLP", "PyTorch", "SQL", "Docker"]
+
+        enriched_parts = [jd_text.strip()]
+        if min_exp_years > 0:
+            enriched_parts.append(f"Minimum Experience: {min_exp_years} years.")
+        if exp_details.strip():
+            enriched_parts.append(f"Experience Details: {exp_details.strip()}.")
+        if selected_edu_label != "Any / No Minimum":
+            enriched_parts.append(f"Minimum Education: {selected_edu_label}.")
+        if edu_details.strip():
+            enriched_parts.append(f"Preferred Degree / Field: {edu_details.strip()}.")
+        full_jd_prompt = "\n".join(p for p in enriched_parts if p)
+
+        st.session_state.screening_criteria = {
+            "skills": parsed_skills,
+            "min_exp_years": float(min_exp_years),
+            "exp_details": exp_details.strip(),
+            "education_level": selected_edu_label,
+            "edu_details": edu_details.strip(),
+        }
+
         if pool:
             st.session_state.ranking_results = batch_parse_and_rank(
                 files=pool,
-                jd_text=jd_text,
-                required_skills=["Python", "Machine Learning", "NLP", "PyTorch", "SQL", "Docker"],
-                min_exp_years=1.0,
-                req_edu_rank=2,
+                jd_text=full_jd_prompt,
+                required_skills=parsed_skills,
+                min_exp_years=float(min_exp_years),
+                req_edu_rank=int(req_edu_rank),
                 skill_vocab=load_skill_vocabulary(),
                 weights=DEFAULT_SCORING_WEIGHTS,
                 embedder=load_embedder(),
             )
-            st.success(f"Processed {len(pool)} resume(s).")
+            st.success(
+                f"Processed {len(pool)} resume(s) with >= {min_exp_years} yrs experience "
+                f"and {selected_edu_label} criteria."
+            )
 
 elif page == "🏆 Candidate Rankings & Why #1":
     st.markdown("## 🏆 Ranked Candidates & Direct Outreach")
@@ -586,12 +675,31 @@ elif page == "🏆 Candidate Rankings & Why #1":
     if not results:
         st.info("No ranked results yet. Run the demo on Home or upload resumes first.")
     else:
-        f_col1, f_col2 = st.columns([2, 1])
+        criteria = st.session_state.get("screening_criteria") or {}
+        if criteria:
+            st.caption(
+                f"Active Screening Criteria: Min Experience = {criteria.get('min_exp_years', 0)} yrs • "
+                f"Education = {criteria.get('education_level', 'Any')} "
+                f"{('(' + criteria['edu_details'] + ')') if criteria.get('edu_details') else ''}"
+            )
+
+        f_col1, f_col2, f_col3, f_col4 = st.columns([2.2, 1.1, 1.3, 0.9])
         search_cand = f_col1.text_input(
-            "Search candidate by name or skill",
+            "Search Name or Skill",
             placeholder="e.g., Tariq Shah, PyTorch...",
         ).strip().lower()
-        max_show = f_col2.selectbox("Show Top Candidates", [10, 25, 50, 100, len(results)], index=1)
+        filter_min_exp = f_col2.number_input(
+            "Min Exp (Yrs)",
+            min_value=0.0,
+            max_value=30.0,
+            value=0.0,
+            step=0.5,
+        )
+        filter_edu = f_col3.text_input(
+            "Filter Education",
+            placeholder="e.g., Bachelor, Master, CS",
+        ).strip().lower()
+        max_show = f_col4.selectbox("Show Top", [10, 25, 50, 100, len(results)], index=1)
 
         indexed_results = list(enumerate(results))
         if search_cand:
@@ -601,6 +709,21 @@ elif page == "🏆 Candidate Rankings & Why #1":
                 if search_cand in str(r.get("name", r.get("candidate_name", ""))).lower()
                 or search_cand in " ".join(r.get("matched_skills") or r.get("matching_skills") or []).lower()
             ]
+        if filter_min_exp > 0:
+            indexed_results = [
+                (idx, r)
+                for idx, r in indexed_results
+                if _safe_float(r.get("experience_years", r.get("estimated_experience_years", 0))) >= filter_min_exp
+            ]
+        if filter_edu:
+            indexed_results = [
+                (idx, r)
+                for idx, r in indexed_results
+                if filter_edu in str(r.get("education_level", r.get("education", ""))).lower()
+            ]
+
+        if not indexed_results:
+            st.warning("No candidates matched your current search/experience/education filters.")
 
         for idx, r in indexed_results[:max_show]:
             raw_name = str(r.get("name", r.get("candidate_name", f"Candidate {idx + 1}")))
@@ -636,23 +759,24 @@ elif page == "🏆 Candidate Rankings & Why #1":
                 subject = quote(f"Interview Invitation — {raw_name} (HireSense AI Top Match)")
                 body = quote(
                     f"Hi {raw_name},\n\n"
-                    f"Your profile ranked #{idx + 1} ({score}% match) in our HireSense AI screening for the AI & Python Engineer role. "
+                    f"Your profile ranked #{idx + 1} ({score}% match) in our HireSense AI screening. "
                     f"We would love to schedule a brief interview with you.\n\nBest regards,\nRecruitment Team"
                 )
                 mailto_url = f"mailto:{email_addr}?subject={subject}&body={body}"
 
-                phone_html = f"<span>📞 <strong>Phone:</strong> {sanitize_text(phone_num)}</span>" if phone_num else ""
-                file_html = f"<span>📎 <strong>CV:</strong> {sanitize_text(src_file)}</span>" if src_file else ""
-                contact_html = f"""
-                <div class="contact-card">
-                  <div class="contact-meta">
-                    <span>✉️ <strong>Email:</strong> {sanitize_text(email_addr)}</span>
-                    {phone_html}
-                    {file_html}
-                  </div>
-                  <a href="{mailto_url}" target="_blank" class="contact-btn">✉️ Contact {sanitize_text(raw_name)}</a>
-                </div>
-                """
+                meta_parts = [f"<span>✉️ <strong>Email:</strong> {sanitize_text(email_addr)}</span>"]
+                if phone_num:
+                    meta_parts.append(f"<span>📞 <strong>Phone:</strong> {sanitize_text(phone_num)}</span>")
+                if src_file:
+                    meta_parts.append(f"<span>📎 <strong>CV:</strong> {sanitize_text(src_file)}</span>")
+                meta_html = " ".join(meta_parts)
+
+                contact_html = (
+                    f'<div class="contact-card">'
+                    f'<div class="contact-meta">{meta_html}</div>'
+                    f'<a href="{mailto_url}" target="_blank" class="contact-btn">✉️ Contact {sanitize_text(raw_name)}</a>'
+                    f"</div>"
+                )
                 st.markdown(contact_html, unsafe_allow_html=True)
 
                 if contact["file_tuple"] is not None:
