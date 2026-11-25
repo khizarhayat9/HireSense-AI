@@ -1,5 +1,6 @@
 """HireSense AI — Enterprise High-Volume Resume Screening & Semantic Job Matching Platform."""
 
+import inspect
 import json
 from pathlib import Path
 import sys
@@ -199,10 +200,32 @@ st.markdown(
 )
 
 
+def _call_safe_extract_zip(raw_bytes: bytes, filename: str):
+    """Call safe_extract_zip matching its actual signature (1 or 2 parameters)."""
+    try:
+        sig = inspect.signature(safe_extract_zip)
+        positional_params = [
+            p
+            for p in sig.parameters.values()
+            if p.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+        ]
+        has_var_args = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values())
+    except Exception:
+        positional_params = []
+        has_var_args = False
+
+    if has_var_args or len(positional_params) >= 2:
+        try:
+            return safe_extract_zip(raw_bytes, filename)
+        except TypeError:
+            return safe_extract_zip(raw_bytes)
+    return safe_extract_zip(raw_bytes)
+
+
 def _extract_zip_safely(raw_bytes: bytes, filename: str) -> list:
     """Safely extract valid resume entries from a ZIP archive across different return formats."""
     try:
-        zip_result = safe_extract_zip(raw_bytes, filename)
+        zip_result = _call_safe_extract_zip(raw_bytes, filename)
     except Exception as exc:
         st.warning(f"{filename}: ZIP inspection error ({exc})")
         return []
