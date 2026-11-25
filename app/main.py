@@ -400,7 +400,13 @@ elif page == "📦 Upload Resumes (1K–5K)":
         for f in uploaded:
             raw = f.getvalue()
             if f.name.lower().endswith(".zip"):
-                extracted, _ = safe_extract_zip(raw, f.name)
+                zip_result = safe_extract_zip(raw, f.name)
+if isinstance(zip_result, tuple):
+    extracted = zip_result[0] if len(zip_result) > 0 and isinstance(zip_result[0], list) else []
+elif isinstance(zip_result, list):
+    extracted = zip_result
+else:
+    extracted = []
                 pool.extend(extracted)
             else:
                 ok, reason = verify_magic_bytes(raw, f.name)
