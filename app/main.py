@@ -199,6 +199,39 @@ st.markdown(
 )
 
 
+def _extract_zip_safely(raw_bytes: bytes, filename: str) -> list:
+    """Safely extract valid resume entries from a ZIP archive across different return formats."""
+    try:
+        zip_result = safe_extract_zip(raw_bytes, filename)
+    except Exception as exc:
+        st.warning(f"{filename}: ZIP inspection error ({exc})")
+        return []
+
+    candidates = []
+    if isinstance(zip_result, tuple):
+        for item in zip_result:
+            if isinstance(item, list):
+                candidates = item
+                break
+    elif isinstance(zip_result, list):
+        candidates = zip_result
+    elif isinstance(zip_result, dict):
+        for val in zip_result.values():
+            if isinstance(val, list):
+                candidates = val
+                break
+
+    valid_entries = []
+    for entry in candidates:
+        if isinstance(entry, tuple) and len(entry) == 2:
+            entry_name, entry_bytes = entry
+            if isinstance(entry_name, str) and isinstance(entry_bytes, (bytes, bytearray)):
+                ok, _ = verify_magic_bytes(bytes(entry_bytes), entry_name)
+                if ok:
+                    valid_entries.append((entry_name, bytes(entry_bytes)))
+    return valid_entries
+
+
 @st.cache_resource
 def load_embedder():
     try:
@@ -400,17 +433,7 @@ elif page == "📦 Upload Resumes (1K–5K)":
         for f in uploaded:
             raw = f.getvalue()
             if f.name.lower().endswith(".zip"):
-                zip_result = safe_extract_zip(raw, f.name)
-                if isinstance(zip_result, tuple):
-                    extracted = (
-                        zip_result[0]
-                        if len(zip_result) > 0 and isinstance(zip_result[0], list)
-                        else []
-                    )
-                elif isinstance(zip_result, list):
-                    extracted = zip_result
-                else:
-                    extracted = []
+                extracted = _extract_zip_safely(raw, f.name)
                 pool.extend(extracted)
             else:
                 ok, reason = verify_magic_bytes(raw, f.name)
