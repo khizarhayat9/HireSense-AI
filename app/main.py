@@ -200,6 +200,17 @@ st.markdown(
 )
 
 
+def _check_magic_bytes(filename: str, raw_bytes: bytes) -> tuple[bool, str]:
+    """Validate file magic bytes using (filename, raw_bytes) as expected by nlp/security.py."""
+    try:
+        res = verify_magic_bytes(filename, raw_bytes)
+    except TypeError:
+        res = verify_magic_bytes(raw_bytes, filename)
+    if isinstance(res, tuple):
+        return bool(res[0]), str(res[1]) if len(res) > 1 else ""
+    return bool(res), ""
+
+
 def _call_safe_extract_zip(raw_bytes: bytes, filename: str):
     """Call safe_extract_zip matching its actual signature (1 or 2 parameters)."""
     try:
@@ -249,7 +260,7 @@ def _extract_zip_safely(raw_bytes: bytes, filename: str) -> list:
         if isinstance(entry, tuple) and len(entry) == 2:
             entry_name, entry_bytes = entry
             if isinstance(entry_name, str) and isinstance(entry_bytes, (bytes, bytearray)):
-                ok, _ = verify_magic_bytes(bytes(entry_bytes), entry_name)
+                ok, _ = _check_magic_bytes(entry_name, bytes(entry_bytes))
                 if ok:
                     valid_entries.append((entry_name, bytes(entry_bytes)))
     return valid_entries
@@ -459,7 +470,7 @@ elif page == "📦 Upload Resumes (1K–5K)":
                 extracted = _extract_zip_safely(raw, f.name)
                 pool.extend(extracted)
             else:
-                ok, reason = verify_magic_bytes(raw, f.name)
+                ok, reason = _check_magic_bytes(f.name, raw)
                 if ok:
                     pool.append((f.name, raw))
                 else:
