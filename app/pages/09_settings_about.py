@@ -1,45 +1,97 @@
-"""Page 9: Configurable Scoring Weights, Ethics & Architecture Info."""
+"""Page 9: Scoring Configuration & System Methodology."""
 
 import streamlit as st
-from config import DEFAULT_SCORING_WEIGHTS
+
+st.set_page_config(page_title="Scoring Configuration & System Methodology", layout="wide")
+
+DEFAULT_WEIGHTS = {
+    "skills": 40,
+    "semantic": 25,
+    "experience": 15,
+    "tfidf": 10,
+    "education": 10,
+}
+
+st.session_state.setdefault("scoring_weights", dict(DEFAULT_WEIGHTS))
+if not isinstance(st.session_state.get("scoring_weights"), dict):
+    st.session_state.scoring_weights = dict(DEFAULT_WEIGHTS)
 
 st.title("Scoring Configuration & System Methodology")
-
 st.subheader("Customize Scoring Engine Weights")
-st.write("Adjust how much weight each NLP signal contributes to the composite match score. Values are automatically normalized to 100%.")
+st.write(
+    "Adjust how much weight each NLP signal contributes to the composite match score. "
+    "Values are automatically normalized to 100%."
+)
 
 w = st.session_state.scoring_weights
-w_skills = st.slider("Required Skills Coverage Weight", 0.0, 1.0, float(w["skills_match"]), 0.05)
-w_sem = st.slider("Semantic Embedding Similarity Weight (SBERT)", 0.0, 1.0, float(w["semantic_similarity"]), 0.05)
-w_tfidf = st.slider("Lexical TF-IDF Similarity Weight", 0.0, 1.0, float(w["tfidf_similarity"]), 0.05)
-w_exp = st.slider("Experience Alignment Weight", 0.0, 1.0, float(w["experience_match"]), 0.05)
-w_edu = st.slider("Education Alignment Weight", 0.0, 1.0, float(w["education_match"]), 0.05)
 
-col1, col2 = st.columns(2)
-if col1.button("Save Scoring Weights", type="primary"):
-    total = w_skills + w_sem + w_tfidf + w_exp + w_edu
-    if total == 0:
-        st.error("At least one weight must be greater than zero.")
-    else:
-        st.session_state.scoring_weights = {
-            "skills_match": round(w_skills / total, 4),
-            "semantic_similarity": round(w_sem / total, 4),
-            "tfidf_similarity": round(w_tfidf / total, 4),
-            "experience_match": round(w_exp / total, 4),
-            "education_match": round(w_edu / total, 4),
-        }
-        st.success("Updated scoring weights! Re-run matching to apply changes.")
+c1, c2, c3 = st.columns(3)
+skills_w = c1.slider(
+    "Verified Skills Weight",
+    min_value=0,
+    max_value=100,
+    value=int(w.get("skills", DEFAULT_WEIGHTS["skills"])),
+    step=5,
+)
+semantic_w = c2.slider(
+    "Neural Semantic Similarity Weight",
+    min_value=0,
+    max_value=100,
+    value=int(w.get("semantic", DEFAULT_WEIGHTS["semantic"])),
+    step=5,
+)
+exp_w = c3.slider(
+    "Experience Years Weight",
+    min_value=0,
+    max_value=100,
+    value=int(w.get("experience", DEFAULT_WEIGHTS["experience"])),
+    step=5,
+)
 
-if col2.button("Reset to Default Weights"):
-    st.session_state.scoring_weights = DEFAULT_SCORING_WEIGHTS.copy()
-    st.rerun()
+c4, c5 = st.columns(2)
+tfidf_w = c4.slider(
+    "TF-IDF Keyword Precision Weight",
+    min_value=0,
+    max_value=100,
+    value=int(w.get("tfidf", DEFAULT_WEIGHTS["tfidf"])),
+    step=5,
+)
+edu_w = c5.slider(
+    "Education Level Weight",
+    min_value=0,
+    max_value=100,
+    value=int(w.get("education", DEFAULT_WEIGHTS["education"])),
+    step=5,
+)
+
+raw_weights = {
+    "skills": skills_w,
+    "semantic": semantic_w,
+    "experience": exp_w,
+    "tfidf": tfidf_w,
+    "education": edu_w,
+}
+total_raw = sum(raw_weights.values())
+
+col_btn1, col_btn2 = st.columns([1, 1])
+with col_btn1:
+    if st.button("Save & Normalize Weights", type="primary"):
+        if total_raw <= 0:
+            st.session_state.scoring_weights = dict(DEFAULT_WEIGHTS)
+            st.warning("Total weight was 0; restored balanced default weights totaling 100%.")
+        else:
+            normalized = {
+                k: round((v / total_raw) * 100, 1) for k, v in raw_weights.items()
+            }
+            diff = round(100.0 - sum(normalized.values()), 1)
+            normalized["skills"] = round(normalized["skills"] + diff, 1)
+            st.session_state.scoring_weights = normalized
+            st.success("Scoring weights saved and normalized to 100%.")
+with col_btn2:
+    if st.button("Reset to Default Weights"):
+        st.session_state.scoring_weights = dict(DEFAULT_WEIGHTS)
+        st.info("Reset scoring weights to default values.")
 
 st.divider()
-st.subheader("Responsible AI & Limitations")
-st.markdown(
-    """
-    - **Decision Support Only:** HireSense AI surfaces textual alignment signals to assist human recruiters; it never automates hiring decisions.
-    - **Bias & Privacy Protection:** Protected attributes (age, gender, race, nationality, religion) are never extracted or used in scoring.
-    - **Known Limitations:** Creative resume formatting, heavy graphics, or non-standard skill acronyms outside the taxonomy may reduce recall, which is why hybrid semantic embeddings (`all-MiniLM-L6-v2`) accompany exact keyword matching.
-    """
-)
+st.subheader("Active Normalized Weights (%)")
+st.json(st.session_state.scoring_weights)
